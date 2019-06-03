@@ -10,7 +10,9 @@ var parser = new XMLJS.Parser();
 //重组，将json重组为xml
 var fs= require("fs");            // 
  
-var EventFunction=require("./wechat")
+var EventFunction=require("./wechat")           //  接收的事件
+var menu=require('./menuList')                  //  菜单列表
+
 var info = {                      //  验证信息
     token: 'test',                //  your wechat token
     appid: 'wxac382a686f71ef96',  //  your wechat appid
@@ -27,58 +29,17 @@ function getAccessToken(url){
         let data=JSON.parse(body);
         info.access_token=data.access_token
         fs.writeFile('./token.txt', data.access_token , function(err) {});   // 将自己的token写入方便查看
+        menu(data.access_token);
       });
 }
 getAccessToken(url);
 // 获取access_token
-let menuList={
-    "button": [
-        {
-            "type": "click", 
-            "name": "今日歌曲22", 
-            "key": "V1001_TODAY_MUSIC"
-        }, 
-        {
-            "name": "菜单22", 
-            "sub_button": [
-                {
-                    "type": "view", 
-                    "name": "搜索22", 
-                    "url": "http://www.soso.com/"
-                }, 
-                {
-                    "type": "miniprogram", 
-                    "name": "wx22a", 
-                    "url": "http://mp.weixin.qq.com", 
-                    "appid": "wx286b93c14bbf93aa", 
-                    "pagepath": "pages/lunar/index"
-                }, 
-                {
-                    "type": "click", 
-                    "name": "赞一下我们", 
-                    "key": "V1001_GOOD"
-                }
-            ]
-        }
-    ]
-}
-request({                                                                                            // 发送请求
-    url:' https://api.weixin.qq.com/cgi-bin/menu/create?access_token='+info.access_token,            // 请求路径等info.accesstoken有值在用
-    method: "POST",                            // 请求方式，默认为get
-    headers: {                                 //设置请求头
-        "content-type": "application/json",
-    },
-    body: JSON.stringify(menuList)             // post参数字符串
-}, function(error, response, body) {
-            console.log(body);
-            // console.log(body);
-});
-// 自定义菜单
+
+
 app.post('/', function(req, res, next) {                                 // 接收请求，获取xml数据 对请求进行各种回馈
         req.on("data", function(data) {                                  // 将xml解析
             parser.parseString(data.toString(), function(err, result) {  // xml转字符串
                 var body = result.xml;
-                console.log(body);                                       // 获取到的body值
                 var messageType = body.MsgType[0];                       // 获取返回类型
                 if(messageType === 'event') {
                     var eventName = body.Event[0];

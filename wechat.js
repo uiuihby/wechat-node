@@ -3,12 +3,21 @@ var builder = new XMLJS.Builder();
 //微信客户端各类回调用接口
 var EventFunction = {
   //关注
-  subscribe: function(result, req, res) {
-      console.log("关注");  
+  subscribe: function(body, req, res) {
+    var xml  = {xml: {
+      ToUserName: body.FromUserName,
+      FromUserName: body.ToUserName,
+      CreateTime: + new Date(),
+      MsgType: 'text',
+      Content: '编辑@+您想说的话，我们可以收到'
+  }};
+  xml.xml.Content = '你好,第10号关注者'
+  xml = builder.buildObject(xml);
+  res.send(xml);
   },
   //注销
-  unsubscribe: function(openid, req, res) {
-      console.log("删除")
+  unsubscribe: function(body, req, res) {
+      console.log('再见了您嘞');
   },
   //打开某个网页
   VIEW: function() {
