@@ -15,7 +15,7 @@ var EventFunction = {
   xml = builder.buildObject(xml);
   res.send(xml);
   },
-  //注销
+  //注销.
   unsubscribe: function(body, req, res) {
       console.log('再见了您嘞');
   },
