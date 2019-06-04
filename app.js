@@ -11,7 +11,7 @@ var parser = new XMLJS.Parser();
 var fs= require("fs");            // 
  
 var EventFunction=require("./wechat")           //  接收的事件
-var menu=require('./menuList')                  //  菜单列表
+var menu=require('./menuList')                  //  菜单列表   使用时传入
 
 var info = {                      //  验证信息
     token: 'test',                //  your wechat token
@@ -25,11 +25,10 @@ setInterval(function(){
     getAccessToken(url);
 },7000000)
 function getAccessToken(url){
-    request(url, function (error, response, body) {         // 发送请求获取access_token
+    request(url, function (error, response, body) {                    // 发送请求获取access_token
         let data=JSON.parse(body);
         info.access_token=data.access_token
         fs.writeFile('./token.txt', data.access_token , function(err) {});   // 将自己的token写入方便查看
-        menu(data.access_token);
       });
 }
 getAccessToken(url);
@@ -41,11 +40,17 @@ app.post('/', function(req, res, next) {                                 // 接�
             parser.parseString(data.toString(), function(err, result) {  // xml转字符串
                 var body = result.xml;
                 var messageType = body.MsgType[0];                       // 获取返回类型
-                if(messageType === 'event') {
+                if(messageType === 'event') {                            // 点击事件回复
                     var eventName = body.Event[0];
-                    (EventFunction[eventName]||function(){})(body, req, res);
+                    if(eventName!="CLICK"){                             // 关注与取消事件
+                        (EventFunction[eventName]||function(){})(body, req, res);
+                    }else {                                           // 底部按钮点击事件
+                        let eventKey=body.EventKey[0];
+                        (EventFunction[eventKey]||function(){})(body, req, res);
+                    }
+
                 //自动回复消息
-                }else if(messageType === 'text') {
+                }else if(messageType === 'text') {                        // 文本回复
                     EventFunction.responseNews(body, res);
                 }else {
                     res.send('我好像无法理解您在说什么呢');
